@@ -10,10 +10,7 @@ func main() {
 
 	p := router.Group("/patients")
 	{
-		p.POST("/admit", handlers.AdmitPatient)
-		p.GET("/admit", handlers.GetPatients)
-		p.DELETE("/admit/:patientId", handlers.DischargePatient)
-		p.POST("/register", handlers.RegisterPatient)
+		handlers.RegisterPatientRoutes(p)
 	}
 
 	router.Run(":8082")

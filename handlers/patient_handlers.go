@@ -7,38 +7,34 @@ import (
 	"github.com/fitnis/patient-service/services"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
-// curl -X POST -H "Content-Type: application/json" -d '{"name":"John Doe","dob":"1990-01-01","reason":"Chest pain"}' http://localhost:8082/patients/admit
-func AdmitPatient(c *gin.Context) {
-	var req models.PatientRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
-		return
-	}
-	id := uuid.New().String()
-	c.JSON(http.StatusCreated, services.AdmitPatient(id, req))
+func RegisterPatientRoutes(rg *gin.RouterGroup) {
+	patients := rg.Group("/patients")
+	patients.POST("/admit", admitPatient)
+	patients.GET("/admit", getPatients)
+	patients.DELETE("/admit/:patientId", dischargePatient)
+	patients.POST("/register", registerPatient)
 }
 
-// curl http://localhost:8082/patients/admit
-func GetPatients(c *gin.Context) {
+func admitPatient(c *gin.Context) {
+	var req models.PatientRequest
+	_ = c.ShouldBindJSON(&req)
+	c.JSON(http.StatusCreated, services.AdmitPatient(req))
+}
+
+func getPatients(c *gin.Context) {
 	c.JSON(http.StatusOK, services.GetAdmittedPatients())
 }
 
-// curl -X DELETE http://localhost:8082/patients/admit/{patientId}
-func DischargePatient(c *gin.Context) {
+func dischargePatient(c *gin.Context) {
 	id := c.Param("patientId")
 	services.DischargePatient(id)
 	c.Status(http.StatusNoContent)
 }
 
-// curl -X POST -H "Content-Type: application/json" -d '{"name":"Jane Smith","dob":"1985-11-20","reason":"Checkup"}' http://localhost:8082/patients/register
-func RegisterPatient(c *gin.Context) {
+func registerPatient(c *gin.Context) {
 	var req models.PatientRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
-		return
-	}
+	_ = c.ShouldBindJSON(&req)
 	c.JSON(http.StatusCreated, services.RegisterPatient(req))
 }
